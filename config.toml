@@ -1,0 +1,6 @@
+token = "YOUR_BOT_TOKEN"
+mac_separator = ":"
+
+[devices.example]
+mac = "12:34:56:78:9A:BC"
+telegram_id = 1234567890
