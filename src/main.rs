@@ -55,6 +55,7 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
 
                 let mac_address_result = settings.get_string(&format!("devices.{}.mac", device));
                 let telegram_id = settings.get_int(&format!("devices.{}.telegram_id", device));
+                let incoming_id = msg.from().unwrap().id.0 as i64;
                 // Check if device's mac address and authorized user id is configured correctly
                 if mac_address_result.is_err() || telegram_id.is_err() {
                     bot.send_message(
@@ -62,13 +63,13 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
                         format!("Device \"{device}\" not correctly configured."),
                     )
                     .await?
-                } else if vec![msg.from().unwrap().id.0 as i64, 0 as i64]
-                    .contains(&telegram_id.unwrap())
-                // Allow user to wake device if telegram_id is 0 or matches the user's id
+                } else if !vec![incoming_id, 0 as i64].contains(&telegram_id.unwrap())
+                // Block user from waking device if telegram_id isn't 0 or doesn't match the user's id
                 {
+                    log::info!("Unauthorized user {incoming_id} tried to wake {device}");
                     bot.send_message(
                         msg.chat.id,
-                        format!("You are not authorized to wake {device}."),
+                        format!("You ({incoming_id}) are not authorized to wake {device}."),
                     )
                     .await?
                 } else {
