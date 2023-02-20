@@ -1,0 +1,15 @@
+[Unit]
+Description=cloudflared
+After=network.target
+
+[Service]
+TimeoutStartSec=0
+Type=simple
+KillMode=mixed
+KillSignal=SIGKILL
+ExecStart=/opt/bots/tgwol/target/release/tgwol
+WorkingDirectory=/opt/bots/tgwol/target/release
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
