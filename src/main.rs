@@ -84,7 +84,7 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
 
                     // Setup wol packet and send
                     let wol = wakey::WolPacket::from_string(&mac_address, mac_separator);
-                    log::info!(
+                    log::debug!(
                         "Waking {device} ({mac_address})...",
                         device = device,
                         mac_address = mac_address
