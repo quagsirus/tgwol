@@ -61,13 +61,14 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
                 Command::descriptions().to_string()
                 + &format!("\n\n{repo_string} v{}", VERSION.unwrap_or("Unknown"))
             )
-            .parse_mode(ParseMode::Html)
-            .await?
+                .parse_mode(ParseMode::Html)
+                .await?
         }
         Command::Wake(device) => {
             // If no device is specified, send an error message
             if device == "" {
-                bot.send_message(msg.chat.id, "Please specify a device.")
+                bot.send_message(msg.chat.id, "Please specify a device, e.g.\n<code>/wake mydevice</code>")
+                    .parse_mode(ParseMode::Html)
                     .await?
             } else {
                 // Load device configuration
@@ -83,7 +84,7 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
                 if mac_address_result.is_err() || telegram_id.is_err() {
                     bot.send_message(
                         msg.chat.id,
-                        format!("Device \"{device}\" not correctly configured."),
+                        format!("Device \"{device}\" is not correctly configured."),
                     )
                     .await?
                 } else if !vec![incoming_id, 0 as i64].contains(&telegram_id.unwrap())
@@ -108,13 +109,13 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
                     // Setup wol packet and send
                     let wol = wakey::WolPacket::from_string(&mac_address, mac_separator).unwrap();
                     log::debug!(
-                        "Waking {device} ({mac_address})...",
+                        "Sending magic packet to {device} ({mac_address})...",
                         device = device,
                         mac_address = mac_address
                     );
                     if wol.send_magic().is_ok() {
                         // Success
-                        bot.send_message(msg.chat.id, format!("Waking {device}..."))
+                        bot.send_message(msg.chat.id, format!("Sent magic packet to {device}!"))
                             .reply_markup(ReplyMarkup::keyboard(vec![
                                 vec![KeyboardButton::new(format!("/wake {device}"))],
                                 ]))
@@ -123,7 +124,7 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
                         // wakey gave an error
                         bot.send_message(
                             msg.chat.id,
-                            format!("There was a problem waking {device}..."),
+                            format!("There was a problem waking {device}."),
                         )
                         .await?
                     }
