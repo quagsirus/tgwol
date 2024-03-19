@@ -20,10 +20,15 @@ async fn main() {
     log::info!("Starting wol bot...");
 
     // Load token from config
-    let settings = Config::builder()
+    let settings_result = Config::builder()
         .add_source(config::File::with_name("config"))
-        .build()
-        .unwrap();
+        .build();
+    if settings_result.is_err() {
+        log::error!("Failed to load config file. Please make sure it exists and is valid.");
+        std::process::exit(1);
+    }
+    let settings = settings_result.unwrap();
+
     let token = settings.get_string("token").unwrap();
     if token == "YOUR_BOT_TOKEN" {
         log::error!("Token not set in config.toml");
