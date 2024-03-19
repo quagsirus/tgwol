@@ -16,6 +16,10 @@ async fn main() {
         .build()
         .unwrap();
     let token = settings.get_string("token").unwrap();
+    if token == "YOUR_BOT_TOKEN" {
+        log::error!("Token not set in config.toml");
+        std::process::exit(1);
+    }
     // Create instance of bot
     let bot = Bot::new(token);
     Command::repl(bot, answer).await;
