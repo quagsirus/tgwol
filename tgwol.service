@@ -1,6 +1,6 @@
 [Unit]
-Description=cloudflared
-After=network.target
+Description=tgwol
+After=network-online.target
 
 [Service]
 TimeoutStartSec=0
