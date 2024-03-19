@@ -1,5 +1,5 @@
 use config::Config;
-use teloxide::{prelude::*, utils::command::BotCommands};
+use teloxide::{prelude::*, utils::command::BotCommands, types::ReplyMarkup, types::KeyboardButton};
 
 #[tokio::main]
 async fn main() {
@@ -92,6 +92,9 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
                     if wol.send_magic().is_ok() {
                         // Success
                         bot.send_message(msg.chat.id, format!("Waking {device}..."))
+                            .reply_markup(ReplyMarkup::keyboard(vec![
+                                vec![KeyboardButton::new(format!("/wake {device}"))],
+                                ]))
                             .await?
                     } else {
                         // wakey gave an error
