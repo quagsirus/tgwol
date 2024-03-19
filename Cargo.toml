@@ -1,5 +1,6 @@
 [package]
 name = "tgwol"
+description = "Telegram bot sending Wake-on-LAN packets to devices local to the server's network."
 version = "0.1.2"
 repository = "https://github.com/quagsirus/tgwol"
 license = "Unlicense"
