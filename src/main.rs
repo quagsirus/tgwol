@@ -1,5 +1,14 @@
 use config::Config;
-use teloxide::{prelude::*, utils::command::BotCommands, types::ReplyMarkup, types::KeyboardButton};
+use teloxide::{
+    prelude::*,
+    utils::command::BotCommands,
+    types::KeyboardButton,
+    types::ParseMode,
+    types::ReplyMarkup
+};
+
+const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
+const REPOSITORY: Option<&str> = option_env!("CARGO_PKG_REPOSITORY");
 
 #[tokio::main]
 async fn main() {
@@ -41,9 +50,19 @@ enum Command {
 async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
     match cmd {
         Command::Help => {
+            // Build repository inline link if available
+            let mut repo_string = String::from("tgwol");
+            if REPOSITORY.is_some() {
+                repo_string = format!("<a href=\"{}\">tgwol</a>", REPOSITORY.unwrap().to_string());
+            }
+
             // Send a message listing all the commands
-            bot.send_message(msg.chat.id, Command::descriptions().to_string())
-                .await?
+            bot.send_message(msg.chat.id,
+                Command::descriptions().to_string()
+                + &format!("\n\n{repo_string} v{}", VERSION.unwrap_or("Unknown"))
+            )
+            .parse_mode(ParseMode::Html)
+            .await?
         }
         Command::Wake(device) => {
             // If no device is specified, send an error message
