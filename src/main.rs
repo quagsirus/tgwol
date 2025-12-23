@@ -1,10 +1,9 @@
 use config::Config;
+use log::LevelFilter;
 use teloxide::{
     prelude::*,
+    types::{KeyboardButton, ParseMode, ReplyMarkup},
     utils::command::BotCommands,
-    types::KeyboardButton,
-    types::ParseMode,
-    types::ReplyMarkup
 };
 
 const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
@@ -12,11 +11,12 @@ const REPOSITORY: Option<&str> = option_env!("CARGO_PKG_REPOSITORY");
 
 #[tokio::main]
 async fn main() {
-    // Default log level to info if not set
-    if let Err(_) = std::env::var("RUST_LOG") {
-        std::env::set_var("RUST_LOG", "info");
-    }
-    pretty_env_logger::init();
+    // Default log level INFO, can be overriden via env variable RUST_LOG
+    let mut builder = pretty_env_logger::formatted_builder();
+    builder.filter_level(LevelFilter::Info);
+    builder.parse_default_env();
+    builder.init();
+
     log::info!("Starting wol bot...");
 
     // Load token from config
@@ -62,19 +62,23 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
             }
 
             // Send a message listing all the commands
-            bot.send_message(msg.chat.id,
+            bot.send_message(
+                msg.chat.id,
                 Command::descriptions().to_string()
-                + &format!("\n\n{repo_string} v{}", VERSION.unwrap_or("Unknown"))
+                    + &format!("\n\n{repo_string} v{}", VERSION.unwrap_or("Unknown")),
             )
-                .parse_mode(ParseMode::Html)
-                .await?
+            .parse_mode(ParseMode::Html)
+            .await?
         }
         Command::Wake(device) => {
             // If no device is specified, send an error message
             if device == "" {
-                bot.send_message(msg.chat.id, "Please specify a device, e.g.\n<code>/wake mydevice</code>")
-                    .parse_mode(ParseMode::Html)
-                    .await?
+                bot.send_message(
+                    msg.chat.id,
+                    "Please specify a device, e.g.\n<code>/wake mydevice</code>",
+                )
+                .parse_mode(ParseMode::Html)
+                .await?
             } else {
                 // Load device configuration
                 let settings = Config::builder()
@@ -84,7 +88,7 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
 
                 let mac_address_result = settings.get_string(&format!("devices.{}.mac", device));
                 let telegram_id = settings.get_int(&format!("devices.{}.telegram_id", device));
-                let incoming_id = msg.from().unwrap().id.0 as i64;
+                let incoming_id = msg.from.unwrap().id.0 as i64;
                 // Check if device's mac address and authorized user id is configured correctly
                 if mac_address_result.is_err() || telegram_id.is_err() {
                     bot.send_message(
@@ -121,9 +125,9 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
                     if wol.send_magic().is_ok() {
                         // Success
                         bot.send_message(msg.chat.id, format!("Sent magic packet to {device}!"))
-                            .reply_markup(ReplyMarkup::keyboard(vec![
-                                vec![KeyboardButton::new(format!("/wake {device}"))],
-                                ]))
+                            .reply_markup(ReplyMarkup::keyboard(vec![vec![KeyboardButton::new(
+                                format!("/wake {device}"),
+                            )]]))
                             .await?
                     } else {
                         // wakey gave an error

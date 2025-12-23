@@ -1,17 +1,17 @@
 [package]
 name = "tgwol"
 description = "Telegram bot sending Wake-on-LAN packets to devices local to the server's network."
-version = "0.1.4"
+version = "0.2.0"
 repository = "https://github.com/quagsirus/tgwol"
 license = "Unlicense"
-edition = "2021"
+edition = "2024"
 
 
 [dependencies]
-ron = "0.8"
-config = "0.14.0"
+ron = "0.12.0"
+config = "0.15.19"
 wakey = "0.3.0"
-teloxide = { version = "0.12", features = ["macros"] }
-log = "0.4"
+teloxide = { version = "0.17.0", features = ["macros"] }
+log = "0.4.29"
 pretty_env_logger = "0.5.0"
-tokio = { version =  "1.8", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1.8", features = ["rt-multi-thread", "macros"] }
